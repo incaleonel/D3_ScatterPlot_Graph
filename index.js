@@ -16,10 +16,52 @@ const main = d3.select('body')
             main.append('h2')
                .attr('id','subtitle')
                 .text("35 Fastest times up Alpe d'Huez");
-            
+
+const tooltip = main.append('div')
+                    .attr('id','tooltip');    
+
 const svg = main.append('svg')
                 .attr('width',w)
                 .attr('height',h)
+            
+         svg.append('text')
+            .text('Time in Minutes')
+            .attr('fill','white')
+            .attr('transform','rotate(-90)')
+            .attr('x',-180)
+            .attr('y',15)
+
+const legend = svg.append('g')
+                  .attr('id','legend')
+                  
+                  
+                  legend.append('text')
+                        .text('No doping allegations')
+                        .attr('fill','white')
+                        .attr('x',650  )
+                        .attr('y',200);
+
+                  legend.append('rect')   
+                        .attr('width', '15px')
+                        .attr('height','15px')
+                        .attr('fill','rgb(255, 228, 152)')
+                        .attr('x',810)
+                        .attr('y',188);
+
+                  legend.append('text')
+                        .text('Riders with doping allegations')
+                        .attr('fill','white')
+                        .attr('x',594)
+                        .attr('y',225);
+
+                  legend.append('rect')   
+                        .attr('width', '15px')
+                        .attr('height','15px')
+                        .attr('fill','#88DBFF')
+                        .attr('x',810)
+                        .attr('y',213);
+                        
+                    
 
 const req = new XMLHttpRequest();
 
@@ -27,8 +69,7 @@ const req = new XMLHttpRequest();
     req.send()
     req.onload = function(){
         const json = JSON.parse(req.responseText);
-        
-                 
+        console.log(json)
         const xScale = d3.scaleTime()
                          .domain([new Date(d3.min(json,d=>d.Year) -1,1,1), new Date(d3.max(json,d=>d.Year),12,1)])
                          .range([padding,w-padding]);
@@ -63,6 +104,16 @@ const req = new XMLHttpRequest();
                .attr('r', 6)
                .attr('fill', d => {
                   return d.Doping === '' ? '#FFE498':'#88DBFF'
+               })
+               .on('mouseover', function(event,d){
+                  tooltip.style('visibility','visible')
+                         .attr('data-year', d.Year)
+                         .html(d.Name + ': ' + d.Nationality + '<br>Year: ' + d.Year + ', Time: ' + d.Time + (d.Doping === '' ? '':'<br><br>') + d.Doping)
+                         .style('left', event.x + 'px')
+                         .style('top', event.y + 'px' )
+               })
+               .on('mouseout', function(){
+                  tooltip.style('visibility','hidden')
                });
             
     }
